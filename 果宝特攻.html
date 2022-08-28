@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>果宝特攻</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            /* font-family: "Microsoft yahei", serif; */
+        }
+
+        li {
+            list-style-type: none;
+        }
+
+        body {
+            overflow: hidden;
+            user-select: none;
+            background-image: url("img/yy.jpg");
+            background-size: cover;
+        }
+
+        #box {
+            position: relative;
+            width: 512px;
+            height: 768px;
+            margin: auto;
+        }
+
+        .ask {
+            width: 370px;
+            position: absolute;
+            top: 30px;
+            left: 80px;
+            border-radius: 70px;
+        }
+
+        #map {
+            overflow: hidden;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("img/00.jpg");
+            /* opacity: 80%; */
+        }
+
+        #level {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            width: 100%;
+            height: 100%;
+        }
+
+        #level h1 {
+            font-size: 40px;
+            padding-top: 60px;
+            padding-bottom: 150px;
+            line-height: 60px;
+            text-align: center;
+            /* color: #fff; */
+        }
+
+        #level p {
+            margin: 30px auto;
+            width: 200px;
+            height: 35px;
+            font-size: 30px;
+            line-height: 35px;
+            text-align: center;
+            background: pink;
+            font-weight: 700;
+            border-radius: 15%;
+            cursor: pointer;
+        }
+
+        #level p:hover {
+            background: pink;
+            color: #fff;
+        }
+
+        #map .plane,
+        #map .biu,
+        #map .enemy,
+        #map .boom,
+        #map .boom2 {
+            position: absolute;
+        }
+
+        #map .plane {
+            z-index: 8;
+        }
+
+        #map .biu {
+            z-index: 10;
+        }
+
+        #map .boom2 {
+            z-index: 11;
+            animation: bling 2s 1;
+            animation-fill-mode: forwards;
+        }
+
+        #map .enemy {
+            z-index: 9;
+        }
+
+        #map .boom {
+            z-index: 7;
+            animation: fade .8s 1;
+            animation-fill-mode: forwards;
+        }
+
+        @keyframes fade {
+            from {
+                opacity: 1;
+            }
+
+            to {
+                opacity: 0;
+            }
+        }
+
+        @keyframes bling {
+            0% {
+                opacity: 1;
+            }
+
+            20% {
+                opacity: 0;
+            }
+
+            40% {
+                opacity: 1;
+            }
+
+            60% {
+                opacity: 0;
+            }
+
+            80% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+
+        #score {
+            /* font-family:"宋体" ; */
+            /* height: 30px;
+            border: 1px solid #CCCC00;
+            border-radius: 25%; */
+            display: none;
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            /* background-color: #FFFF99; */
+            /* color: red; */
+            color: #FF9933;
+            font-weight: 900;
+            line-height: 40px;
+            font-size: 40px;
+            font-weight: bold;
+            z-index: 20;
+            text-shadow: 0 0 0.5em #9f0d87, 0 0 0.2em #5c5c5c;
+        }
+
+        #restart {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 30;
+        }
+
+        #restart p {
+            width: 300px;
+            height: 40px;
+            line-height: 30px;
+            margin: 140px auto;
+            color: red;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        #restart p span {
+            display: block;
+            font-weight: bolder;
+            font-size: 22px;
+            text-align: center;
+            font-family: "楷体";
+        }
+
+
+        #restart .p1 span {
+            color: red;
+            font-family: "楷体";
+            font-size: 28px;
+        }
+
+        #restart .p2 span {
+            font-size: 28px;
+            font-family: "楷体";
+            color: red;
+            font-weight: 700;
+            /* color: #ffa80c; */
+        }
+
+        #restart .p3 {
+            font-family: "楷体";
+            font-size: 20px;
+            width: 100px;
+            height: 35px;
+            background: rgb(255, 255, 255);
+            background: rgba(255, 255, 255, .8);
+            color: #000;
+            font-weight: bolder;
+            line-height: 35px;
+            text-align: center;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        #restart .p3:hover {
+            background: white;
+        }
+    </style>
+</head>
+
+<body>
+    <audio id="bgg" src="backyy.mp4" loop autoplay></audio>
+    <img class="ask" src="img/askgame.jpg" alt="">
+    <div id="box">
+
+        <div id="level">
+            <h1>果宝特攻v1.0</h1>
+            <p>低端关卡</p>
+            <p>中端关卡</p>
+            <p>高端关卡</p>
+            <p style="color: #f00">您的专属关卡</p>
+        </div>
+        <div id="map">
+            <div id="BiuAll"></div>
+        </div>
+        <div id="score">0</div>
+        <div id="restart">
+            <p class="p1">您的最终得分是： <span>0</span></p>
+            <p class="p2">获得称号：<span>抠脚侠</span></p>
+            <p class="p3">重新开始</p>
+        </div>
+    </div>
+
+    <script>
+
+        window.requestAnimationFrame = window.requestAnimationFrame || function (fn) { return setTimeout(fn, 1000 / 60) };
+        window.cancelAnimationFrame = window.cancelAnimationFrame || clearTimeout;
+
+        
+        //全局变量
+        var oBox = document.getElementById("box"),
+            oScore = document.getElementById("score"),
+            oRe = document.getElementById("restart"),
+            oLevel = document.getElementById("level"),
+            oMap = document.getElementById("map"),
+            oBiuAll = document.getElementById("BiuAll"),
+            oBgg = document.getElementById("bgg");
+            allBiu = oBiuAll.children,
+            allReChild = oRe.children,
+            boxOffsetTop = oBox.offsetTop,
+            boxOffsetLeft = oBox.offsetLeft;
+
+        //音量设置
+        function getVolume() {
+            alert(oBgg.volume);
+        }
+        function setVolume() {
+            oBgg.volume = 0.5;
+        }
+        this.setVolume();
+
+        function toggleSound() {
+            var music = document.getElementById("bgg");//获取ID
+                console.log(music);
+                console.log(music.paused);
+            if (music.paused) { //判读是否播放
+                music.paused=false;
+                music.play(); //没有就播放
+            }
+
+        }
+        setInterval("toggleSound()",1);
+
+
+        //启动
+        exe();
+        //初始选择难度界面的点击事件
+        function exe() {
+
+            //难度选择
+            var aP = oLevel.getElementsByTagName("p");
+            for (var i = 0, length = aP.length; i < length; i++) {
+                (function (i) {
+                    aP[i].onclick = function (e) {
+                        e = e || window.event;
+                        startGame(i, {
+                            x: e.clientX - boxOffsetLeft,
+                            y: e.clientY - boxOffsetTop
+                        });//第一个实参为序号 ，第二个实参为存储着鼠标距离map边缘距离的json
+                    }
+                })(i);
+            }
+
+            //restart按钮
+            allReChild[2].onclick = function (ev) {
+                cancelAnimationFrame(oMap.bgTimer);//停止背景滚动
+                oRe.style.display = "none";
+                oLevel.style.display = "block";
+                oScore.innerHTML = 0;
+                oMap.innerHTML = "<div id='BiuAll'></div>";
+                oBiuAll = document.getElementById("BiuAll");
+                allBiu = oBiuAll.children;
+            };
+        }
+
+        //开始游戏
+        function startGame(level, pos) {
+
+            clearMap(); //执行 隐藏和清理
+            PeoTalk(level);
+            MapBg(level); //执行 Map背景相关操作
+            var p = plane(level, pos); //执行 创建我军
+            enemy(level, p); //执行 创建敌军
+            //enemy(level , plane(level , pos));
+            oBox.score = 0;//得分清零
+        }
+
+        //隐藏和清理
+        function clearMap() {
+            oScore.style.display = "block";
+            oLevel.style.display = "none";//隐藏关卡选择框
+        }
+
+        //PeoTalk语音包
+        function PeoTalk(level) {
+            var n = new Audio();
+            n.src = "语音包" + (level + 1) + ".mp4";
+            n.autoplay = true;
+        }
+
+        //Map背景选择与运动
+        function MapBg(level) {
+            oMap.style.backgroundImage = "url('img/bk-" + (level + 1) + ".jpg')";
+            (function m() {
+                oMap.bgPosY = oMap.bgPosY || 0;
+                oMap.bgPosY++;
+                oMap.style.backgroundPositionY = oMap.bgPosY + 'px';
+                oMap.bgTimer = requestAnimationFrame(m);
+            })();
+        }
+
+        //创建我军
+        function plane(level, pos) {
+            //创建我军图片
+            var oImg = new Image();//document.createElement("img");
+            oImg.src = "img/陆小果" + (level + 1) + ".png";
+            oImg.width = 70;
+            oImg.height = 70;
+            oImg.className = "plane";
+            oImg.style.left = pos.x - oImg.width / 2 + 'px';
+            oImg.style.top = pos.y - oImg.height / 2 + 'px';
+            oMap.appendChild(oImg);
+
+            //边界值
+            var leftMin = -oImg.width / 2,
+                leftMax = oMap.clientWidth - oImg.width / 2,
+                topMin = 0,
+                topMax = oMap.clientHeight - oImg.height / 2;
+
+            //加入mousemove事件
+            document.onmousemove = function (ev) {
+                ev = ev || window.event;
+                //获取果冻实时坐标，并限制边界值
+                var left = ev.clientX - boxOffsetLeft - oImg.width / 2;
+                var top = ev.clientY - boxOffsetTop - oImg.height / 2;
+                left = Math.max(leftMin, left);
+                left = Math.min(leftMax, left);
+                top = Math.max(topMin, top);
+                top = Math.min(topMax, top);
+                //赋值
+                oImg.style.left = left + 'px';
+                oImg.style.top = top + 'px';
+            };
+
+            //调用子弹函数
+            fire(oImg, level);
+
+            return oImg;
+        }
+
+        //我军子弹
+        function fire(oImg, level) {
+            oBox.biuInterval = setInterval(function () {
+                if (oBox.score >= 500) {
+                    createBiu(true, -1);
+                    createBiu(true, 1);
+                } else {
+                    createBiu();
+                }
+            }, [100, 80, 70, 15][level]);
+
+            function createBiu(index, d, level) {
+                //创建子弹            
+                var oBiu = new Image();
+                oBiu.src = "img/子弹-4.png";
+
+                oBiu.width = 32;
+                oBiu.height = 30;
+                oBiu.className = "biu";
+
+                // var left = oImg.offsetLeft + oImg.width / 2 - oBiu.width / 2 - 10;
+                // var top = oImg.offsetTop - oBiu.height + 80;
+                var left = oImg.offsetLeft + oImg.width / 2 - oBiu.width / 2;
+                var top = oImg.offsetTop - oBiu.height;
+
+                if (index) {
+                    left += oBiu.width * d
+                }
+
+                oBiu.style.left = left + "px";
+                oBiu.style.top = top + 'px';
+
+
+                oBiuAll.appendChild(oBiu);
+
+                //子弹运动
+                function m() {
+                    if (oBiu.parentNode) {
+                        var top = oBiu.offsetTop - 20;
+                        if (top < -oBiu.height) {
+                            oBiuAll.removeChild(oBiu);
+                        } else {
+                            oBiu.style.top = top + 'px';
+                            requestAnimationFrame(m);
+                        }
+                    }
+                }
+                //将运动执行队列放后面，不然子弹会直接初始就在 top-50 的位置
+                setTimeout(function () {
+                    requestAnimationFrame(m);
+                }, 50);
+            }
+        }
+
+        //创建敌军
+        function enemy(level, oPlane) {
+            var w = oMap.clientWidth,
+                h = oMap.clientHeight;
+
+            var speed = [3, 4, 3, 5][level]; //敌军下落速度
+            var num = 1;
+            oBox.enemyIntetval = setInterval(function () {
+                var index = num % 30 ? 1 : 0;
+
+                //生成敌军
+                var oEnemy = new Image();
+                oEnemy.index = index;
+                oEnemy.HP = [20, 1][index];
+                oEnemy.speed = speed + (Math.random() * 0.6 - 0.3) * speed;
+                oEnemy.speed *= index ? 1 : 0.5;
+
+                oEnemy.src = "img/敌人" + (level + 1) + ".png";
+                oEnemy.className = "enemy";
+                // oEnemy.width = [104, 54][index];
+                // oEnemy.height = [80, 40][index];
+                oEnemy.width = [63, 50][index];
+                oEnemy.height = [90, 77.5][index];
+                oEnemy.style.left = Math.random() * w - oEnemy.width / 2 + 'px';
+                oEnemy.style.top = -oEnemy.height + 'px';
+                oMap.appendChild(oEnemy);
+                num++;
+                //敌军运动
+                function m() {
+                    if (oEnemy.parentNode) {
+                        var top = oEnemy.offsetTop;
+                        top += oEnemy.speed;
+                        if (top >= h) {
+                            oBox.score--; //漏掉飞机减分
+                            oScore.innerHTML = oBox.score;
+                            oMap.removeChild(oEnemy);
+                        } else {
+                            oEnemy.style.top = top + 'px';
+                            //子弹碰撞检测
+                            for (var i = allBiu.length - 1; i >= 0; i--) {
+                                var objBiu = allBiu[i];
+                                if (coll(oEnemy, objBiu)) {
+                                    oBiuAll.removeChild(objBiu);//移除子弹
+                                    oEnemy.HP--;
+                                    if (!oEnemy.HP) {
+                                        oBox.score += oEnemy.index ? 2 : 20; //打掉飞机加分
+                                        oScore.innerHTML = oBox.score;
+                                        boom(oEnemy.offsetLeft, oEnemy.offsetTop, oEnemy.width, oEnemy.height, index ? 0 : 2);//敌军爆炸图
+                                        oMap.removeChild(oEnemy);//移除敌军
+                                        return;
+                                    }
+                                }
+                            }
+                            //我军碰撞检测
+                            if (oPlane.parentNode && coll(oEnemy, oPlane)) {
+                                boom(oEnemy.offsetLeft, oEnemy.offsetTop, oEnemy.width, oEnemy.height, index ? 0 : 2);//敌军爆炸图
+                                boom(oPlane.offsetLeft, oPlane.offsetTop, oPlane.width, oPlane.height, 1);//我军爆炸图
+                                oMap.removeChild(oEnemy);//移除敌军
+                                oMap.removeChild(oPlane);//移除我军
+                                GameOver();
+                                return;
+                            }
+                            requestAnimationFrame(m);
+                        }
+                    }
+                }
+                requestAnimationFrame(m);
+            }, [350, 150, 120, 60][level]);
+        }
+
+        //爆炸函数
+        function boom(l, t, w, h, i) {
+            var oBoom = new Image();
+            var a = new Audio();
+            a.src = "bz.mp4";
+            a.autoplay = true;
+            oBoom.src = "img/" + ["boom_small", "boom_small", "boom_big"][i] + ".png";
+            oBoom.className = 'boom' + ["", "2", ""][i];
+            oBoom.width = w;
+            oBoom.height = h;
+            oBoom.style.left = l + "px";
+            oBoom.style.top = t + 'px';
+            oMap.appendChild(oBoom);
+            // setTimeout(function () {
+            //     oBoom.parentNode && oMap.removeChild(oBoom);
+            // }, [1200, 2500, 1200][i]);
+        }
+
+        //两个物体 碰撞检测
+        function coll(obj1, obj2) {
+            var T1 = obj1.offsetTop,
+                B1 = T1 + obj1.clientHeight,
+                L1 = obj1.offsetLeft,
+                R1 = L1 + obj1.clientWidth;
+
+            var T2 = obj2.offsetTop,
+                B2 = T2 + obj2.clientHeight,
+                L2 = obj2.offsetLeft,
+                R2 = L2 + obj2.clientWidth;
+
+            return !(B1 < T2 || R1 < L2 || T1 > B2 || L1 > R2);
+        }
+
+        //游戏结束
+        function GameOver() {
+            document.onmousemove = null; //清除移动事件
+            clearInterval(oBox.biuInterval);//不再产生新子弹
+            clearInterval(oBox.enemyIntetval);//不再产生新敌军
+            restart();
+        }
+
+        //结算+重新开始
+        function restart() {
+            oScore.style.display = "none";
+
+            var s = oBox.score;
+            var honor;
+
+            if (s < -300) {
+                honor = "分数有点不理想呢";
+            } else if (s < 50) {
+                honor = "小试牛刀";
+            } else if (s < 100) {
+                honor = "表现还可以吧";
+            } else if (s < 200) {
+                honor = "初级果宝大师";
+            } else if (s < 300) {
+                honor = "高级果宝大师";
+            } else if (s < 450) {
+                honor = "王者级果宝大师";
+            } else {
+                honor = "帅的五体投地";
+            }
+            oRe.style.display = "block";
+            allReChild[0].children[0].innerHTML = s;
+            allReChild[1].children[0].innerHTML = honor;
+        }
+
+    </script>
+</body>
+
+</html>
